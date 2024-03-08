@@ -6,6 +6,7 @@ import rtde_receive
 import rtde_control
 
 class Board:
+    # f = open("setup.json", encoding="utf-8")
     def __init__(self, 
                  host_info, 
                  origin, 
@@ -46,7 +47,7 @@ class Board:
         }
 
         # Initialization
-        self.controller.moveL(
+        self.controller.moveL(                                                            # Moves to board's origin.
             [self.origin[0], 
              self.origin[1], 
              self.height + 0.1,
@@ -56,6 +57,12 @@ class Board:
              0.5,
              0.3
         )
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((self.host_info[0], self.host_info[1]))
+        sock.send(bytes("sec myProg():\n\tset_tool_voltage(0)\nend\nmyProg()\n", "utf-8")) # Ensures magnet is off. 
+        sock.close()
+        sleep(0.2)
+        
         
     def translate(self, pos):
         # Takes a position in the board's coordinate space, then translates
@@ -72,7 +79,6 @@ class Board:
         new_pos = [self.board_data[square_name]["x"] / 1000, self.board_data[square_name]["y"] / 1000]
         
         self.robot_position = self.translate(new_pos)
-        print(self.robot_position)
         self.controller.moveL(
             [
                 self.robot_position[0],
@@ -194,11 +200,11 @@ board = Board([HOSTNAME, HOST_PORT],
               BOARD_HEIGHT,
               ANGLE)
 
-board.move_to("h8")
+board.move_to("a1")
 board.connect("r")
-board.move_to("h5")
+board.move_to("a5")
 board.connect("r")
-board.move_to("h2")
-board.connect("p")
+board.move_to("b1")
+board.connect("n")
 board.dispense()
 board.rest()
