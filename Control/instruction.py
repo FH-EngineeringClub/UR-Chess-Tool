@@ -6,7 +6,6 @@ import rtde_receive
 import rtde_control
 
 class Board:
-    # f = open("setup.json", encoding="utf-8")
     def __init__(self, 
                  host_info, 
                  origin, 
