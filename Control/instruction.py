@@ -5,15 +5,33 @@ import math
 import rtde_receive
 import rtde_control
 
+HOSTNAME = "192.168.2.81"  # IP address assigned to arm
+HOST_PORT = 30002  # Port associated with IP
+
+ANGLE = 44.785  # Angle measured between the y-axis in the TCP's coordinate space 
+                # and the vector parallel to the side of the board (rad)
+
+ORIGIN_X = 0.401  # x coordinate of the origin in the TCP's coordinate space (m)
+ORIGIN_Y = -0.564 # y coordinate of the origin in the TCP's coordinate space (m)
+
+TCP_RX = 1.393  # Rotation of TCP about its x axis (rad)
+TCP_RY = -2.770  # Rotation of TCP about its y axis (rad) 
+TCP_RZ = -0.085  # Rotation of TCP about its z axis (rad)
+
+BOARD_HEIGHT = 0.014  # Height of the board relative to the base of the robot in the TCP's coordinate space (m)
+
+REST_LOCATION = [-0.11676, -0.3524, 0.133]  # Position TCP comes to rest at (m)
+DISPENSE_LOCATION = [.0087, -.6791]         # Position TCP will dispense pieces at (m)
+
 class Board:
     def __init__(self, 
-                 host_info, 
-                 origin, 
-                 TCP_orientation, 
-                 rest_position,
-                 dispense_position,
-                 height, 
-                 trns_angle):
+                 host_info = [HOSTNAME, HOST_PORT], 
+                 origin = [ORIGIN_X, ORIGIN_Y], 
+                 TCP_orientation = [TCP_RX, TCP_RY, TCP_RZ], 
+                 rest_position = REST_LOCATION,
+                 dispense_position = DISPENSE_LOCATION,
+                 height = BOARD_HEIGHT, 
+                 trns_angle = ANGLE):
         
         self.controller = rtde_control.RTDEControlInterface(host_info[0])       # Receiving TCP information
         self.receiver = rtde_receive.RTDEReceiveInterface(host_info[0])         # Controlling TCP
@@ -37,19 +55,19 @@ class Board:
         self.board_data = json.load(f)                     # Location of each chess square in board's coordinate space
 
         self.piece_heights = {                             # Heights of each piece (m)
-            "k" : 0.0762,                                  # King
-            "p" : 0.0356,                                  # Pawn
-            "r" : 0.04,                                    # Rook
-            "n" : 0.0457,                                  # Knight
-            "b" : 0.0559,                                  # Bishop
-            "q" : 0.0686                                   # Queen
+            "king" : 0.0762,                                  
+            "pawn" : 0.0356,                                  
+            "rook" : 0.04,                                    
+            "knight" : 0.0457,                                  
+            "bishop" : 0.0559,                                  
+            "queen" : 0.0686                                   
         }
 
         # Initialization
         self.controller.moveL(                                                            # Moves to board's origin.
             [self.origin[0], 
              self.origin[1], 
-             self.height + 0.1,
+             self.height + 0.15,
              self.orientation[0],
              self.orientation[1],
              self.orientation[2]],
@@ -82,7 +100,7 @@ class Board:
             [
                 self.robot_position[0],
                 self.robot_position[1],
-                self.height + 0.1, 
+                self.height + 0.15, 
                 self.orientation[0],
                 self.orientation[1],
                 self.orientation[2]
@@ -105,7 +123,7 @@ class Board:
         
         sock.send(bytes(command, "utf-8"))
         sock.close()
-        sleep(0.2)
+        sleep(0.3)
 
     def connect(self, piece):
         # Lowers TCP to square space, turns magnet either off and on,
@@ -129,7 +147,7 @@ class Board:
             [
                 self.robot_position[0],
                 self.robot_position[1],
-                self.height + 0.1, 
+                self.height + 0.15, 
                 self.orientation[0],
                 self.orientation[1],
                 self.orientation[2]
@@ -144,7 +162,7 @@ class Board:
             [
                 self.rest_position[0],
                 self.rest_position[1],
-                self.height + 0.1, 
+                self.height + 0.15, 
                 self.orientation[0],
                 self.orientation[1],
                 self.orientation[2]
@@ -159,7 +177,7 @@ class Board:
             [
                 self.dispense_position[0],
                 self.dispense_position[1],
-                self.height + 0.1, 
+                self.height + 0.15, 
                 self.orientation[0],
                 self.orientation[1],
                 self.orientation[2]
@@ -170,40 +188,8 @@ class Board:
         self.magnetize()
         
 
+board = Board()
 
-
-HOSTNAME = "192.168.2.81"  # IP address assigned to arm
-HOST_PORT = 30002  # Port associated with IP
-
-ANGLE = 44.785  # Angle measured between the y-axis in the TCP's coordinate space 
-                # and the vector parallel to the side of the board (rad)
-
-ORIGIN_X = 0.401  # x coordinate of the origin in the TCP's coordinate space (m)
-ORIGIN_Y = -0.564 # y coordinate of the origin in the TCP's coordinate space (m)
-
-TCP_RX = 1.393  # Rotation of TCP about its x axis (rad)
-TCP_RY = -2.770  # Rotation of TCP about its y axis (rad) 
-TCP_RZ = -0.085  # Rotation of TCP about its z axis (rad)
-
-BOARD_HEIGHT = 0.021  # Height of the board relative to the base of the robot in the TCP's coordinate space (m)
-
-
-REST_LOCATION = [-0.11676, -0.3524, 0.133]  # Position TCP comes to rest at (m)
-DISPENSE_LOCATION = [.0087, -.6791]         # Position TCP will dispense pieces at (m)
-
-board = Board([HOSTNAME, HOST_PORT], 
-              [ORIGIN_X, ORIGIN_Y], 
-              [TCP_RX, TCP_RY, TCP_RZ],
-              REST_LOCATION, 
-              DISPENSE_LOCATION,
-              BOARD_HEIGHT,
-              ANGLE)
-
-board.move_to("a1")
-board.connect("r")
 board.move_to("a5")
-board.connect("r")
-board.move_to("b1")
-board.connect("n")
+board.connect("pawn")
 board.dispense()
-board.rest()
