@@ -5,7 +5,7 @@ import math
 import rtde_receive
 import rtde_control
 
-HOSTNAME = "192.168.2.81"  # IP address assigned to arm
+HOSTNAME = "xxx.xxx.x.xx"  # IP address assigned to arm
 HOST_PORT = 30002  # Port associated with IP
 
 ANGLE = 44.785  # Angle measured between the y-axis in the TCP's coordinate space 
