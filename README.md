@@ -38,12 +38,6 @@ _(Ubuntu 22.04 recommended for compatibility)_:
 `sudo apt install cmake`  
 `pip install ur-rtde --use-pep517`
 
-## Instructions
-
-- Preview chess.svg in VS code
-
-- Run python_chess.py and input your move in SAN format (e.g. a2a4 or e2e4)
-
 ## Resources
 
 [UR Real-Time Communication Guide](https://www.universal-robots.com/articles/ur/interface-communication/real-time-data-exchange-rtde-guide/)
