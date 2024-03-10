@@ -51,7 +51,7 @@ class Board:
         # Board State Variables
         self.height = height                # (m)
 
-        f = open("ur10 arm\setup.json", encoding="utf-8")  
+        f = open("data\setup.json", encoding="utf-8")  
         self.board_data = json.load(f)                     # Location of each chess square in board's coordinate space
 
         self.piece_heights = {                             # Heights of each piece (m)
