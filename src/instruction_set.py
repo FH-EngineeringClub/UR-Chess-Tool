@@ -5,7 +5,6 @@ from time import sleep
 import socket
 import json
 import math
-import rtde_receive
 import rtde_control
 
 HOSTNAME = "xxx.xxx.x.xx"  # IP address assigned to arm
@@ -36,8 +35,7 @@ class TCP:
                  height = BOARD_HEIGHT, 
                  trns_angle = ANGLE):
         
-        self.controller = rtde_control.RTDEControlInterface(host_info[0])       # Receiving TCP information
-        self.receiver = rtde_receive.RTDEReceiveInterface(host_info[0])         # Controlling TCP
+        self.controller = rtde_control.RTDEControlInterface(host_info[0])       # TCP Controller
         self.origin = origin            # Origin of coordinate system
         self.trns_angle = trns_angle    # Angle which coordinate system is 'rotated' by
         self.host_info = host_info      # Host name and port
