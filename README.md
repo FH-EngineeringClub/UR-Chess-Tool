@@ -40,6 +40,8 @@ _(Ubuntu 22.04 recommended for compatibility)_:
 
 ## Resources
 
+[Project Notion Page (Documentation)](https://splendid-eel-64f.notion.site/UR10-Chess-Robot-eca1ce190f8b4982b52d836f1d4e0b59?pvs=4) 
+
 [UR Real-Time Communication Guide](https://www.universal-robots.com/articles/ur/interface-communication/real-time-data-exchange-rtde-guide/)
 
 [ur_rtde Documentation](https://sdurobotics.gitlab.io/ur_rtde/index.html)
