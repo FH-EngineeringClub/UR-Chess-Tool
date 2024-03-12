@@ -82,7 +82,7 @@ class TCP:
         sleep(0.2)
         
         
-    def translate(self, pos):
+    def __translate(self, pos):
         # Takes a position in the board's coordinate space, then translates
         # it into the arm's coordinate space.
         x_1 = pos[1] * math.cos(self.trns_angle) - pos[0] * math.sin(self.trns_angle)
@@ -96,7 +96,7 @@ class TCP:
         # over that square.
         new_pos = [self.board_data[square_name]["x"] / 1000, self.board_data[square_name]["y"] / 1000]
         
-        self.robot_position = self.translate(new_pos)
+        self.robot_position = self.__translate(new_pos)
         self.controller.moveL(
             [
                 self.robot_position[0],
@@ -175,7 +175,8 @@ class TCP:
     def dispense(self):
         # Moves TCP to dispense location then demagnetizes magnet, dropping the piece.
         if not self.isMagnetized:
-          return "Invalid move, no piece to dispense."
+          print("Invalid move, no piece to dispense.")
+          return
           
         self.controller.moveL(
             [
