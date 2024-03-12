@@ -110,7 +110,7 @@ class TCP:
             self.acceleration
         )
 
-    def magnetize(self):
+    def __magnetize(self):
         # Turns the electromagnet off and on.
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((self.host_info[0], self.host_info[1]))
@@ -142,7 +142,7 @@ class TCP:
             self.acceleration
         )
 
-        self.magnetize()
+        self.__magnetize()
 
         self.controller.moveL(
             [
@@ -190,7 +190,7 @@ class TCP:
             self.velocity,
             self.acceleration
         )
-        self.magnetize()
+        self.__magnetize()
         
 
 board = TCP()
