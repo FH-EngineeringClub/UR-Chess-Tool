@@ -1,6 +1,6 @@
 # UR-Chess-Tool
 
-Modified Universal Robots arm which utilizes AI to play chess with both itself and against another player.
+Repurposed Universal Robots cobot which utilizes AI to play chess with both itself and against another player.
 
 ## Requirements
 
@@ -38,13 +38,9 @@ _(Ubuntu 22.04 recommended for compatibility)_:
 `sudo apt install cmake`  
 `pip install ur-rtde --use-pep517`
 
-## Instructions
-
-- Preview chess.svg in VS code
-
-- Run python_chess.py and input your move in SAN format (e.g. a2a4 or e2e4)
-
 ## Resources
+
+[Project Notion Page (Documentation)](https://splendid-eel-64f.notion.site/UR10-Chess-Robot-eca1ce190f8b4982b52d836f1d4e0b59?pvs=4) 
 
 [UR Real-Time Communication Guide](https://www.universal-robots.com/articles/ur/interface-communication/real-time-data-exchange-rtde-guide/)
 

@@ -1,8 +1,10 @@
+
+# Instruction set for fundamental movements of the cobot's tool center point (TCP)
+
 from time import sleep
 import socket
 import json
 import math
-import rtde_receive
 import rtde_control
 
 HOSTNAME = "xxx.xxx.x.xx"  # IP address assigned to arm
@@ -23,7 +25,7 @@ BOARD_HEIGHT = 0.014  # Height of the board relative to the base of the robot in
 REST_LOCATION = [-0.11676, -0.3524, 0.133]  # Position TCP comes to rest at (m)
 DISPENSE_LOCATION = [.0087, -.6791]         # Position TCP will dispense pieces at (m)
 
-class Board:
+class TCP:
     def __init__(self, 
                  host_info = [HOSTNAME, HOST_PORT], 
                  origin = [ORIGIN_X, ORIGIN_Y], 
@@ -33,25 +35,24 @@ class Board:
                  height = BOARD_HEIGHT, 
                  trns_angle = ANGLE):
         
-        self.controller = rtde_control.RTDEControlInterface(host_info[0])       # Receiving TCP information
-        self.receiver = rtde_receive.RTDEReceiveInterface(host_info[0])         # Controlling TCP
-        self.origin = origin        # Origin of coordinate system
-        self.trns_angle = trns_angle # Angle which coordinate system is 'rotated' by
-        self.host_info = host_info  # Host name and port
+        self.controller = rtde_control.RTDEControlInterface(host_info[0])       # TCP Controller
+        self.origin = origin            # Origin of coordinate system
+        self.trns_angle = trns_angle    # Angle which coordinate system is 'rotated' by
+        self.host_info = host_info      # Host name and port
         
         # TCP State Variables
         self.position = origin              # (m)
         self.velocity = 0.5                 # (m/s)
         self.acceleration = 0.3             # (m/s^2)
         self.orientation = TCP_orientation  # (rad)
-        self.rest_position = rest_position  # (m)
-        self.dispense_position = dispense_position # (m)
         self.isMagnetized = False
 
-        # Board State Variables
-        self.height = height                # (m)
+        # Board Variables
+        self.height = height                        # Height of chess board when measured relative to cobot's base (m)
+        self.rest_position = rest_position          # Position which TCP can come to rest at (m)
+        self.dispense_position = dispense_position  # Position which TCP can dispence pieces at (m)
 
-        f = open("ur10 arm\setup.json", encoding="utf-8")  
+        f = open("data\setup.json", encoding="utf-8")  
         self.board_data = json.load(f)                     # Location of each chess square in board's coordinate space
 
         self.piece_heights = {                             # Heights of each piece (m)
@@ -64,7 +65,7 @@ class Board:
         }
 
         # Initialization
-        self.controller.moveL(                                                            # Moves to board's origin.
+        self.controller.moveL(                                                            # Moves to board's origin
             [self.origin[0], 
              self.origin[1], 
              self.height + 0.15,
@@ -76,12 +77,12 @@ class Board:
         )
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((self.host_info[0], self.host_info[1]))
-        sock.send(bytes("sec myProg():\n\tset_tool_voltage(0)\nend\nmyProg()\n", "utf-8")) # Ensures magnet is off. 
+        sock.send(bytes("sec myProg():\n\tset_tool_voltage(0)\nend\nmyProg()\n", "utf-8")) # Ensures magnet is off
         sock.close()
         sleep(0.2)
         
         
-    def translate(self, pos):
+    def __translate(self, pos):
         # Takes a position in the board's coordinate space, then translates
         # it into the arm's coordinate space.
         x_1 = pos[1] * math.cos(self.trns_angle) - pos[0] * math.sin(self.trns_angle)
@@ -95,7 +96,7 @@ class Board:
         # over that square.
         new_pos = [self.board_data[square_name]["x"] / 1000, self.board_data[square_name]["y"] / 1000]
         
-        self.robot_position = self.translate(new_pos)
+        self.robot_position = self.__translate(new_pos)
         self.controller.moveL(
             [
                 self.robot_position[0],
@@ -109,7 +110,7 @@ class Board:
             self.acceleration
         )
 
-    def magnetize(self):
+    def __magnetize(self):
         # Turns the electromagnet off and on.
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((self.host_info[0], self.host_info[1]))
@@ -126,8 +127,8 @@ class Board:
         sleep(0.3)
 
     def connect(self, piece):
-        # Lowers TCP to square space, turns magnet either off and on,
-        # then raises back off.
+        # Lowers TCP to square space, turns magnet either off or on,
+        # then goes back up.
         self.controller.moveL(
             [
                 self.robot_position[0],
@@ -141,7 +142,7 @@ class Board:
             self.acceleration
         )
 
-        self.magnetize()
+        self.__magnetize()
 
         self.controller.moveL(
             [
@@ -172,7 +173,11 @@ class Board:
         )
     
     def dispense(self):
-        # Magnet is already on, moves TCP to dispense location, then demagnetizes magnet, dropping the piece.
+        # Moves TCP to dispense location then demagnetizes magnet, dropping the piece.
+        if not self.isMagnetized:
+          print("Invalid move, no piece to dispense.")
+          return
+          
         self.controller.moveL(
             [
                 self.dispense_position[0],
@@ -185,10 +190,10 @@ class Board:
             self.velocity,
             self.acceleration
         )
-        self.magnetize()
+        self.__magnetize()
         
 
-board = Board()
+board = TCP()
 
 board.move_to("a5")
 board.connect("pawn")
